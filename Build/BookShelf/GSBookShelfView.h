@@ -41,6 +41,7 @@
 
 @protocol GSBookShelfViewDelegate;
 @protocol GSBookShelfViewDataSource;
+@protocol GSBookViewContainerViewDelegate;
 
 @interface GSBookShelfView : UIScrollView<UIScrollViewDelegate> {
 @private
@@ -86,6 +87,7 @@
 
 @property (nonatomic, readonly) BOOL dragAndDropEnabled;
 @property (nonatomic, assign) BOOL scrollWhileDragingEnabled;
+@property (nonatomic, assign) BOOL booksAreEnabledToReorder;
 
 @property (nonatomic, readonly) CGFloat cellHeight; // height of each cell
 @property (nonatomic, readonly) CGFloat cellMargin; // margin of cell where to display the first book
@@ -144,6 +146,11 @@
 @optional
 // Override to support rearranging.
 - (void)bookShelfView:(GSBookShelfView *)bookShelfView moveBookFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
+
+// Implement to support more actions during gesture recognizer
+- (void)bookShelfView:(GSBookShelfView *)bookShelfView didDetectLongTapGestureRecognizerStateBegan:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
+- (void)bookShelfView:(GSBookShelfView *)bookShelfView didDetectLongTapGestureRecognizerStateChange:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
+- (void)bookShelfView:(GSBookShelfView *)bookShelfView didDetectLongTapGestureRecognizerStateEnded:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
 
 @end
 

@@ -482,13 +482,19 @@ typedef enum {
 #pragma mark - Gesture Recognizer
 
 - (void)handleLongPressGesture:(UILongPressGestureRecognizer *)gestureRecognizer {
+    CGPoint touchPoint = [gestureRecognizer locationInView:self];
+    BookViewPostion position = [self bookViewPositionAtPoint:touchPoint];
     
+    /// STATE BEGAN
     if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        CGPoint touchPoint = [gestureRecognizer locationInView:self];
         BOOL dragAndDropEnable = _parentBookShelfView.dragAndDropEnabled;
-        if (dragAndDropEnable) {
-            
-            BookViewPostion position = [self bookViewPositionAtPoint:touchPoint];
+        BOOL booksAreEnabledToReorder = _parentBookShelfView.booksAreEnabledToReorder;
+        
+        if ([_bookViewContainerViewDelegate respondsToSelector:@selector(bookShelfDidDetectLongTapGestureRecognizerStateBegan:withBookIndex:)]) {
+            [_bookViewContainerViewDelegate bookShelfDidDetectLongTapGestureRecognizerStateBegan:gestureRecognizer withBookIndex:position.index];
+        }
+        
+        if (booksAreEnabledToReorder && dragAndDropEnable) {
             CGRect bookViewRect = [self bookViewRectAtBookViewPosition:position];
             
             if (CGRectContainsPoint(bookViewRect, touchPoint) && [self isBookViewPositionVisible:position]) {
@@ -503,18 +509,21 @@ typedef enum {
                 _isDragViewRemovedFromVisibleBookViews = NO;
             }
         }
-    }
+    } /// STATE CHANGED
     else if (gestureRecognizer.state == UIGestureRecognizerStateChanged) {
         if (_isDragViewPickedUp) {
-            CGPoint touchPoint = [gestureRecognizer locationInView:self];
+            if ([_bookViewContainerViewDelegate respondsToSelector:@selector(bookShelfDidDetectLongTapGestureRecognizerStateChange:withBookIndex:)]) {
+                [_bookViewContainerViewDelegate bookShelfDidDetectLongTapGestureRecognizerStateChange:gestureRecognizer withBookIndex:position.index];
+            }
+            
             _dragView.center = touchPoint;
             [self moveBooksIfNecessary];
             [self scrollIfNecessary];
-            
         }
     }
     /*else if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
-        if (_isDragViewPickedUp) {
+        
+        /if (_isDragViewPickedUp) {
             [UIView animateWithDuration:0.3
                                   delay:0.0
                                 options:UIViewAnimationCurveLinear | UIViewAnimationOptionLayoutSubviews
@@ -527,9 +536,9 @@ typedef enum {
             
             
         }
-        [self stopScrollTimer];
+        [self stopScrollTimer];/
     }*/
-    else {
+    else { /// OTHER STATES
         if (_isDragViewPickedUp) {
             [UIView animateWithDuration:0.3
                                   delay:0.0
@@ -551,6 +560,11 @@ typedef enum {
             
         }
         [self stopScrollTimer];
+        
+        /// STATE ENDED
+        if ((gestureRecognizer.state == UIGestureRecognizerStateEnded) && [_bookViewContainerViewDelegate respondsToSelector:@selector(bookShelfDidDetectLongTapGestureRecognizerStateEnded:withBookIndex:)]) {
+            [_bookViewContainerViewDelegate bookShelfDidDetectLongTapGestureRecognizerStateEnded:gestureRecognizer withBookIndex:position.index];
+        }
     }
 
 }

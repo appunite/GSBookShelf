@@ -38,8 +38,9 @@
 
 @class GSBookShelfView;
 
-@protocol GSBookShelfViewDelegate;
 @protocol GSBookShelfViewDataSource;
+@protocol GSBookShelfViewDelegate;
+@protocol GSBookViewContainerViewDelegate;
 
 typedef struct BookViewPostion {
     NSInteger row;
@@ -89,6 +90,7 @@ typedef struct BookViewPostion {
 }
 
 @property (nonatomic, unsafe_unretained) GSBookShelfView *parentBookShelfView;
+@property (nonatomic, strong) id<GSBookViewContainerViewDelegate> bookViewContainerViewDelegate;
 
 - (void)reloadData;
 
@@ -102,4 +104,11 @@ typedef struct BookViewPostion {
 - (void)removeBookViewsAtIndexs:(NSIndexSet *)indexs animate:(BOOL)animate;
 - (void)insertBookViewsAtIndexs:(NSIndexSet *)indexs animate:(BOOL)animate;
 
+@end
+
+@protocol GSBookViewContainerViewDelegate <NSObject>
+@optional
+- (void)bookShelfDidDetectLongTapGestureRecognizerStateChange:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
+- (void)bookShelfDidDetectLongTapGestureRecognizerStateBegan:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
+- (void)bookShelfDidDetectLongTapGestureRecognizerStateEnded:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex;
 @end

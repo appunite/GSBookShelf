@@ -34,9 +34,9 @@
 */
 
 #import "GSBookShelfView.h"
-#import "GSBookViewContainerView.h"
 #import "GSCellContainerView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "GSBookViewContainerView.h"
 
 @interface GSBookShelfView (Private)
 
@@ -73,6 +73,7 @@
         
         _dragAndDropEnabled = YES;
         _scrollWhileDragingEnabled = YES;
+        _booksAreEnabledToReorder = YES;
         
         _bookViewContainerView = [[GSBookViewContainerView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, 0)];
         _bookViewContainerView.parentBookShelfView = self;
@@ -103,6 +104,9 @@
 
 - (void)setDataSource:(id<GSBookShelfViewDataSource>)dataSource {
     _dataSource = dataSource;
+    if ([_bookViewContainerView respondsToSelector:@selector(setBookViewContainerViewDelegate:)]) {
+        [_bookViewContainerView setBookViewContainerViewDelegate:(id)self];
+    }
     if (![_dataSource respondsToSelector:@selector(bookShelfView:moveBookFromIndex:toIndex:)]) {
         _dragAndDropEnabled = NO;
     }
@@ -321,6 +325,29 @@
 
 - (UIView *)cellAtRow:(NSInteger)row {
     return [_cellContainerView cellAtRow:row];
+}
+
+#pragma mark - GSBookViewContainerView delegate
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)bookShelfDidDetectLongTapGestureRecognizerStateBegan:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex {
+    if ([_dataSource respondsToSelector:@selector(bookShelfView:didDetectLongTapGestureRecognizerStateBegan:withBookIndex:)]) {
+        [_dataSource bookShelfView:self didDetectLongTapGestureRecognizerStateBegan:gestureRecognizer withBookIndex:bookIndex];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)bookShelfDidDetectLongTapGestureRecognizerChange:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex {
+    if ([_dataSource respondsToSelector:@selector(bookShelfView:didDetectLongTapGestureRecognizerStateChange:withBookIndex:)]) {
+        [_dataSource bookShelfView:self didDetectLongTapGestureRecognizerStateChange:gestureRecognizer withBookIndex:bookIndex];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)bookShelfDidDetectLongTapGestureRecognizerStateEnded:(UIGestureRecognizer*)gestureRecognizer withBookIndex:(NSInteger)bookIndex {
+    if ([_dataSource respondsToSelector:@selector(bookShelfView:didDetectLongTapGestureRecognizerStateEnded:withBookIndex:)]) {
+        [_dataSource bookShelfView:self didDetectLongTapGestureRecognizerStateEnded:gestureRecognizer withBookIndex:bookIndex];
+    }
 }
 
 #pragma mark - test code 
